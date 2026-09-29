@@ -109,7 +109,7 @@ const GRANTS = [
     nextDeadlineDate: null,
     isEstimate: true,
     deadlineNote:
-      "FY2026 cycle: letters of intent were due Apr 14, 2026, full applications due Jul 9, 2026 (both closed). Next cycle expected ~spring/summer 2027 — watch coastalscience.noaa.gov/about/funding-opportunities, or contact NOAA's ECOHAB Coordinator Felix Martinez (Felix.Martinez@noaa.gov, 301-237-5414).",
+      "FY2026 cycle: letters of intent were due Apr 14, 2026, full applications due Jul 9, 2026 (both closed). Next cycle expected ~spring/summer 2027 — watch coastalscience.noaa.gov/about/funding-opportunities, or contact NOAA's ECOHAB Coordinator Felix Martinez (Felix.Martinez@noaa.gov, 301-237-5414). AUTHORIZATION RISK: PCMHAB's authorizing statute, HABHRCA, was last reauthorized in 2017 (P.L. 115-423), which extended appropriations authority only through FY2023 — it has lapsed since. A 2025 reauthorization bill (S.93) passed the Senate unanimously on Sep 23, 2025, but its House companion (H.R.644) was still stuck in committee as of Sep 2026. NOAA has kept running PCMHAB on annual appropriations despite the lapsed authorization (the FY2026 cycle above proves that), so this isn't a program that has stopped — but a full-year reauthorization gap adds uncertainty to future cycles; confirm the program is still active before investing significant staff time.",
     status: "closed_next_cycle",
     tags: { wq: 3, canal: 2, habitat: 0, boating: 0, resilience: 0 },
     openPeriod: { type: "window", startMonth: 4, startDay: 14, endMonth: 7, endDay: 9, approx: false, label: "Apr 14 (LOI) – Jul 9 (full application)" },
