@@ -167,6 +167,32 @@ const GRANTS = [
     urlLabel: "FDEP Nonpoint Source Management Program",
   },
   {
+    id: "fdep-cpi-309",
+    name: "Coastal Partnership Initiative (CZMA Section 309 Enhancement Grants)",
+    agency: "Florida DEP, Florida Coastal Management Program (FCMP), using NOAA Coastal Zone Management Act §309 enhancement funds",
+    level: "Federal pass-through via State",
+    levelGroup: "State",
+    summary:
+      "FCMP's competitive pass-through of NOAA CZMA §306/§309 funds to local governments for local coastal-management projects across four priority areas: Resilient Communities, Coastal Resource Stewardship, Access to Coastal Resources, and Working Waterfronts. Note: despite the '309' name, this is a broader coastal-management enhancement program, not a dedicated nonpoint-source-pollution grant — for pollution/runoff-specific funding, see the Section 319/SWAG entry above.",
+    eligibility:
+      "Florida's 35 coastal counties and all municipalities within those counties that are required to include a coastal element in their local comprehensive plan — Fort Lauderdale qualifies as a coastal municipality in Broward County. Public colleges/universities, regional planning councils, national estuary programs, and nonprofits may also apply if an eligible local government participates as a partner.",
+    fundingRange:
+      "$10,000–$60,000 for construction, habitat restoration, invasive/exotic plant removal, or land acquisition projects; $10,000–$30,000 for planning, design, and coordination projects. Roughly $250,000 total available statewide per year, split across all awards.",
+    match: "100% (1:1) match required, cash or in-kind; no more than 50% of the match may come from a third party; federal funds cannot be used as match.",
+    cycle: "Annual RFA via FCMP",
+    nextDeadlineDate: "2026-10-31",
+    isEstimate: false,
+    deadlineNote:
+      "The FY2027-28 Request for Applications opened Sep 1, 2026 and closes Oct 31, 2026 — currently open. Contact the FCMP Grants Section (850-245-2094) for application procedures and eligibility questions.",
+    status: "open",
+    tags: { wq: 1, canal: 2, habitat: 2, boating: 1, resilience: 2 },
+    openPeriod: { type: "window", startMonth: 9, startDay: 1, endMonth: 10, endDay: 31, approx: false, label: "Sep 1 – Oct 31" },
+    whyFit:
+      "Small but flexible dollars for exactly the kind of local canal/ICW work that's hard to fund elsewhere: exotic vegetation removal and native replanting along seawalls, small-scale kayak/canoe launches or boardwalks, working-waterfront revitalization, and coastal vulnerability planning. Award sizes are modest, but the 1:1 match and quick annual cycle make it a good complement to larger programs on this list, and the window is open right now with about a month left.",
+    url: "https://floridadep.gov/rcp/fcmp/content/coastal-partnership-initiative",
+    urlLabel: "FDEP Florida Coastal Management Program — Coastal Partnership Initiative",
+  },
+  {
     id: "fdep-resilient-fl",
     name: "Resilient Florida Grant Program",
     agency: "Florida DEP, Office of Resilience & Coastal Protection",
