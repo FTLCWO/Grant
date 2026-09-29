@@ -255,6 +255,11 @@ function openGrantModal(grantId) {
 function closeGrantModal() {
   document.getElementById("grant-modal").hidden = true;
   document.body.style.overflow = "";
+  // Refresh the timeline views in case a note was edited while the modal was open.
+  if (!document.getElementById("tab-panel-timeline").hidden) {
+    renderGantt();
+    renderPeriodList();
+  }
 }
 
 function render() {
@@ -305,9 +310,11 @@ function renderGantt() {
   const rowH = 26;
   const headerH = 36;
   const labelW = 270;
+  const notesColW = 190;
   const rightPad = 16;
-  const totalW = 1040;
-  const chartW = totalW - labelW - rightPad;
+  const chartW = 1040 - labelW - rightPad;
+  const notesColX = labelW + chartW;
+  const totalW = notesColX + notesColW + rightPad;
   const totalH = headerH + rows.length * rowH + 6;
 
   let svg = `<svg class="gantt-svg" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg">`;
@@ -317,6 +324,8 @@ function renderGantt() {
     svg += `<line class="gantt-gridline" x1="${x.toFixed(1)}" y1="${headerH - 6}" x2="${x.toFixed(1)}" y2="${totalH}" />`;
     svg += `<text class="gantt-month-label" x="${(x + 3).toFixed(1)}" y="${headerH - 14}">${MONTH_NAMES[i]}</text>`;
   });
+  svg += `<line class="gantt-gridline" x1="${notesColX.toFixed(1)}" y1="${headerH - 6}" x2="${notesColX.toFixed(1)}" y2="${totalH}" />`;
+  svg += `<text class="gantt-month-label" x="${(notesColX + 8).toFixed(1)}" y="${headerH - 14}">Notes</text>`;
   svg += `<line class="gantt-gridline" x1="${totalW - rightPad}" y1="${headerH - 6}" x2="${totalW - rightPad}" y2="${totalH}" />`;
 
   const today = new Date();
@@ -359,6 +368,11 @@ function renderGantt() {
     } else {
       svg += `<text class="gantt-varies-label" x="${labelW + 8}" y="${(midY + 4).toFixed(1)}">Varies — no fixed window</text>`;
     }
+
+    const note = getNote(grant.id);
+    const noteText = note ? truncate(note, 24) : "—";
+    svg += `<text class="gantt-notes-label${note ? " has-note" : ""}" x="${(notesColX + 8).toFixed(1)}" y="${(midY + 4).toFixed(1)}">${escapeXml(noteText)}</text>`;
+
     svg += `</g>`;
   });
 
@@ -389,11 +403,16 @@ function renderPeriodList() {
     row.className = "period-row";
     row.tabIndex = 0;
     row.setAttribute("role", "button");
+    const note = getNote(grant.id);
+    const noteHtml = note
+      ? `<div class="period-note">📝 ${escapeXml(truncate(note, 110))}</div>`
+      : `<div class="period-note period-note-empty">No notes yet — click to add one</div>`;
     row.innerHTML = `
       <div>
         <span class="period-name">${grant.name}</span>
         <span class="period-type-badge" style="background:${meta.color}22;color:${meta.color}">${meta.label}</span>
         <div class="period-agency">${grant.agency}</div>
+        ${noteHtml}
       </div>
       <div class="period-value${op.approx ? " approx" : ""}">${op.label}</div>
     `;

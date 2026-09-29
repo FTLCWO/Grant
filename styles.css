@@ -401,6 +401,18 @@ footer {
   fill: var(--text-muted);
 }
 
+.gantt-notes-label {
+  font-size: 11px;
+  fill: var(--text-muted);
+  font-style: italic;
+}
+
+.gantt-notes-label.has-note {
+  fill: var(--navy);
+  font-style: normal;
+  font-weight: 600;
+}
+
 .gantt-bar {
   rx: 4;
   ry: 4;
@@ -476,6 +488,20 @@ footer {
   font-size: 0.76rem;
   color: var(--text-muted);
   grid-column: 1 / -1;
+}
+
+.period-note {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--navy);
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.period-note-empty {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-style: italic;
 }
 
 .period-row .period-value {
