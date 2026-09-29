@@ -9,7 +9,9 @@ const state = {
 
 // Personal notes ("Projected Application") are saved only to this browser's
 // localStorage — there's no backend, so nothing here syncs across devices
-// or is visible to anyone else viewing the app.
+// or is visible to anyone else viewing the app. Each note is { title, description };
+// title is the short label that appears in the Gantt's Notes column, description
+// is free-form detail shown in the period list and modal.
 const NOTES_STORAGE_KEY = "waterwaysGrantNotes";
 
 function loadNotes() {
@@ -21,14 +23,19 @@ function loadNotes() {
 }
 
 function getNote(grantId) {
-  return loadNotes()[grantId] || "";
+  const raw = loadNotes()[grantId];
+  if (!raw) return { title: "", description: "" };
+  // Migrate the old single-string note format (pre-Title/Description split):
+  // treat whatever was saved as the description, with no title yet.
+  if (typeof raw === "string") return { title: "", description: raw };
+  return { title: raw.title || "", description: raw.description || "" };
 }
 
-function saveNote(grantId, text) {
+function saveNote(grantId, title, description) {
   try {
     const notes = loadNotes();
-    if (text.trim()) {
-      notes[grantId] = text;
+    if (title.trim() || description.trim()) {
+      notes[grantId] = { title, description };
     } else {
       delete notes[grantId];
     }
@@ -40,23 +47,29 @@ function saveNote(grantId, text) {
 }
 
 function wireNoteField(container, grantId) {
-  const textarea = container.querySelector(`textarea[data-notes-for="${grantId}"]`);
+  const titleInput = container.querySelector(`input[data-note-title-for="${grantId}"]`);
+  const descTextarea = container.querySelector(`textarea[data-note-desc-for="${grantId}"]`);
   const savedLabel = container.querySelector(`[data-notes-status-for="${grantId}"]`);
-  if (!textarea) return;
+  if (!titleInput || !descTextarea) return;
   // Saves on every keystroke rather than debouncing: a filter/search change
-  // rebuilds the whole grid (destroying this textarea) at any moment, and a
+  // rebuilds the whole grid (destroying these fields) at any moment, and a
   // debounce could lose the last few keystrokes typed just before that happens.
-  textarea.addEventListener("input", () => {
-    const ok = saveNote(grantId, textarea.value);
+  const persist = () => {
+    const ok = saveNote(grantId, titleInput.value, descTextarea.value);
     if (savedLabel) {
       savedLabel.textContent = ok ? "Saved to this browser" : "Couldn't save — storage unavailable";
       savedLabel.classList.toggle("notes-status-error", !ok);
     }
-    // Keep any other instance of this same field (card + modal open at once) in sync.
-    document.querySelectorAll(`textarea[data-notes-for="${grantId}"]`).forEach((el) => {
-      if (el !== textarea) el.value = textarea.value;
+    // Keep any other instance of these same fields (card + modal open at once) in sync.
+    document.querySelectorAll(`input[data-note-title-for="${grantId}"]`).forEach((el) => {
+      if (el !== titleInput) el.value = titleInput.value;
     });
-  });
+    document.querySelectorAll(`textarea[data-note-desc-for="${grantId}"]`).forEach((el) => {
+      if (el !== descTextarea) el.value = descTextarea.value;
+    });
+  };
+  titleInput.addEventListener("input", persist);
+  descTextarea.addEventListener("input", persist);
 }
 
 function daysUntil(isoDate) {
@@ -199,6 +212,7 @@ function grantDetailHtml(grant) {
   }
 
   const levelMeta = LEVEL_META[grant.levelGroup] || { label: grant.levelGroup, color: "#6b7280" };
+  const note = getNote(grant.id);
 
   return `
     <div class="card-top">
@@ -222,13 +236,21 @@ function grantDetailHtml(grant) {
     <div class="deadline-note">${grant.deadlineNote}</div>
     <div class="tags">${tagsHtml}</div>
     <div class="notes-field">
-      <label for="notes-${grant.id}">Projected application / your notes</label>
-      <textarea
-        id="notes-${grant.id}"
-        data-notes-for="${grant.id}"
+      <label for="notes-title-${grant.id}">Title (shows in the timeline's Notes column)</label>
+      <input
+        type="text"
+        id="notes-title-${grant.id}"
+        data-note-title-for="${grant.id}"
         placeholder="e.g. Living shoreline for Abiaka Park"
-        rows="2"
-      >${escapeXml(getNote(grant.id))}</textarea>
+        value="${escapeXml(note.title)}"
+      />
+      <label for="notes-desc-${grant.id}" class="notes-desc-label">Description</label>
+      <textarea
+        id="notes-desc-${grant.id}"
+        data-note-desc-for="${grant.id}"
+        placeholder="Add more detail — scope, contact, budget estimate, next steps…"
+        rows="3"
+      >${escapeXml(note.description)}</textarea>
       <span class="notes-status" data-notes-status-for="${grant.id}"></span>
     </div>
   `;
@@ -370,8 +392,8 @@ function renderGantt() {
     }
 
     const note = getNote(grant.id);
-    const noteText = note ? truncate(note, 24) : "—";
-    svg += `<text class="gantt-notes-label${note ? " has-note" : ""}" x="${(notesColX + 8).toFixed(1)}" y="${(midY + 4).toFixed(1)}">${escapeXml(noteText)}</text>`;
+    const noteText = note.title ? truncate(note.title, 24) : "—";
+    svg += `<text class="gantt-notes-label${note.title ? " has-note" : ""}" x="${(notesColX + 8).toFixed(1)}" y="${(midY + 4).toFixed(1)}">${escapeXml(noteText)}</text>`;
 
     svg += `</g>`;
   });
@@ -404,9 +426,15 @@ function renderPeriodList() {
     row.tabIndex = 0;
     row.setAttribute("role", "button");
     const note = getNote(grant.id);
-    const noteHtml = note
-      ? `<div class="period-note">📝 ${escapeXml(truncate(note, 110))}</div>`
-      : `<div class="period-note period-note-empty">No notes yet — click to add one</div>`;
+    let noteHtml;
+    if (note.title || note.description) {
+      const titlePart = note.title ? `<strong>${escapeXml(note.title)}</strong>` : "";
+      const descPart = note.description ? escapeXml(truncate(note.description, 110)) : "";
+      const separator = titlePart && descPart ? " — " : "";
+      noteHtml = `<div class="period-note">📝 ${titlePart}${separator}${descPart}</div>`;
+    } else {
+      noteHtml = `<div class="period-note period-note-empty">No notes yet — click to add one</div>`;
+    }
     row.innerHTML = `
       <div>
         <span class="period-name">${grant.name}</span>

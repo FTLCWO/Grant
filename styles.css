@@ -602,7 +602,12 @@ footer {
   margin-bottom: 0.3rem;
 }
 
-.notes-field textarea {
+.notes-field .notes-desc-label {
+  margin-top: 0.6rem;
+}
+
+.notes-field textarea,
+.notes-field input[type="text"] {
   width: 100%;
   resize: vertical;
   font: inherit;
@@ -614,7 +619,8 @@ footer {
   color: var(--text);
 }
 
-.notes-field textarea:focus {
+.notes-field textarea:focus,
+.notes-field input[type="text"]:focus {
   outline: none;
   border-color: var(--teal);
   background: #fff;
