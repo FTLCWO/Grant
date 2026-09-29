@@ -530,3 +530,52 @@ footer {
 .modal-close:hover {
   color: var(--navy);
 }
+
+/* --- Personal notes field --- */
+
+.notes-field {
+  border-top: 1px dashed var(--border);
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+}
+
+.notes-field label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+}
+
+.notes-field textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fffdf5;
+  color: var(--text);
+}
+
+.notes-field textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  background: #fff;
+}
+
+.notes-status {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  min-height: 1em;
+}
+
+.notes-status-error {
+  color: #b5642b;
+  font-weight: 600;
+}

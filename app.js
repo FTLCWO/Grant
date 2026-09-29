@@ -7,6 +7,58 @@ const state = {
   sort: "deadline",
 };
 
+// Personal notes ("Projected Application") are saved only to this browser's
+// localStorage — there's no backend, so nothing here syncs across devices
+// or is visible to anyone else viewing the app.
+const NOTES_STORAGE_KEY = "waterwaysGrantNotes";
+
+function loadNotes() {
+  try {
+    return JSON.parse(localStorage.getItem(NOTES_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function getNote(grantId) {
+  return loadNotes()[grantId] || "";
+}
+
+function saveNote(grantId, text) {
+  try {
+    const notes = loadNotes();
+    if (text.trim()) {
+      notes[grantId] = text;
+    } else {
+      delete notes[grantId];
+    }
+    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+    return true;
+  } catch {
+    return false; // storage blocked/full/private browsing — fail quietly
+  }
+}
+
+function wireNoteField(container, grantId) {
+  const textarea = container.querySelector(`textarea[data-notes-for="${grantId}"]`);
+  const savedLabel = container.querySelector(`[data-notes-status-for="${grantId}"]`);
+  if (!textarea) return;
+  // Saves on every keystroke rather than debouncing: a filter/search change
+  // rebuilds the whole grid (destroying this textarea) at any moment, and a
+  // debounce could lose the last few keystrokes typed just before that happens.
+  textarea.addEventListener("input", () => {
+    const ok = saveNote(grantId, textarea.value);
+    if (savedLabel) {
+      savedLabel.textContent = ok ? "Saved to this browser" : "Couldn't save — storage unavailable";
+      savedLabel.classList.toggle("notes-status-error", !ok);
+    }
+    // Keep any other instance of this same field (card + modal open at once) in sync.
+    document.querySelectorAll(`textarea[data-notes-for="${grantId}"]`).forEach((el) => {
+      if (el !== textarea) el.value = textarea.value;
+    });
+  });
+}
+
 function daysUntil(isoDate) {
   if (!isoDate) return null;
   const target = new Date(isoDate + "T00:00:00");
@@ -169,6 +221,16 @@ function grantDetailHtml(grant) {
     ${deadlineLine}
     <div class="deadline-note">${grant.deadlineNote}</div>
     <div class="tags">${tagsHtml}</div>
+    <div class="notes-field">
+      <label for="notes-${grant.id}">Projected application / your notes</label>
+      <textarea
+        id="notes-${grant.id}"
+        data-notes-for="${grant.id}"
+        placeholder="e.g. Living shoreline for Abiaka Park"
+        rows="2"
+      >${escapeXml(getNote(grant.id))}</textarea>
+      <span class="notes-status" data-notes-status-for="${grant.id}"></span>
+    </div>
   `;
 }
 
@@ -176,13 +238,16 @@ function renderCard(grant) {
   const card = document.createElement("article");
   card.className = "card";
   card.innerHTML = grantDetailHtml(grant);
+  wireNoteField(card, grant.id);
   return card;
 }
 
 function openGrantModal(grantId) {
   const grant = GRANTS.find((g) => g.id === grantId);
   if (!grant) return;
-  document.getElementById("modal-body").innerHTML = grantDetailHtml(grant);
+  const modalBody = document.getElementById("modal-body");
+  modalBody.innerHTML = grantDetailHtml(grant);
+  wireNoteField(modalBody, grant.id);
   document.getElementById("grant-modal").hidden = false;
   document.body.style.overflow = "hidden";
 }
